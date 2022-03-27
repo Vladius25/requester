@@ -1,0 +1,138 @@
+openapi: 3.0.2
+servers:
+  - url: /api/v1
+info:
+  title: Requester API
+  version: 1.0.0
+paths:
+  /tasks:
+    post:
+      tags:
+        - tasks
+      summary: Create request task.
+      operationId: createTask
+      requestBody:
+        description: Create a new request task.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/createTaskInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/createTaskOutput"
+  /tasks/{taskID}:
+    get:
+      tags:
+        - tasks
+      summary: Get task status.
+      operationId: getTaskStatus
+      parameters:
+        - name: taskID
+          in: path
+          description: ID of task to return
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/taskStatusOutput"
+        "404":
+          description: Not found
+  /health:
+    get:
+      tags:
+        - health
+      summary: Check service is health.
+      operationId: getHealthStatus
+      responses:
+        "200":
+          description: OK
+components:
+  schemas:
+    createTaskInput:
+      type: object
+      required:
+        - method
+        - url
+      properties:
+        body:
+          description: Request body
+          type: object
+          additionalProperties: true
+        headers:
+          description: Request headers
+          type: object
+          additionalProperties:
+            type: string
+        method:
+          description: Request method
+          type: string
+          enum:
+            - HEAD
+            - GET
+            - POST
+            - PUT
+            - PATCH
+            - DELETE
+        url:
+          description: Request URL
+          type: string
+    createTaskOutput:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          description: Task ID
+          type: string
+          format: uuid
+    taskStatusOutput:
+      type: object
+      required:
+        - id
+        - status
+      properties:
+        id:
+          description: Task ID
+          type: string
+          format: uuid
+        status:
+          description: Processing status
+          allOf:
+            - $ref: "#/components/schemas/taskStatus"
+        headers:
+          description: Response headers
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+        http_status_code:
+          description: Response status code
+          type: integer
+        length:
+          description: Response content length
+          type: integer
+          format: int64
+    taskStatus:
+      type: string
+      enum:
+        - new
+        - done
+        - error
+        - in_process
+      x-enum-varnames:
+        - TaskStatusNew
+        - TaskStatusDone
+        - TaskStatusError
+        - TaskStatusInProcess

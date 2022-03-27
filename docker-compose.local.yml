@@ -1,0 +1,22 @@
+version: "3.7"
+
+services:
+  postgres:
+    restart: unless-stopped
+    image: docker.io/postgres:15-alpine
+    command: -c log_statement=all
+    env_file: .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+  sqs:
+    restart: unless-stopped
+    build:
+      context: build/sqs/
+    ports:
+      - "9324:9324"
+
+volumes:
+  postgres_data:
+
